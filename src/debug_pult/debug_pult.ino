@@ -9,6 +9,5 @@ void setup() {
 
 void loop() {
   pult.update();
-  pult.test_print();
-  Serial.println(pult.x);
+  pult.test_print_operation();
 }
