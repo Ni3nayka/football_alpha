@@ -27,6 +27,7 @@ class Motor {
     }
     void run(int speed=0) {
       speed = constrain(speed,-100,100)*MOTOR_MAP;
+      Serial.println(String(Motor::channel/2+1) + " " + String(speed));
       ledcWrite(Motor::channel, abs(speed));
       ledcWrite(Motor::channel+1, abs(-speed));
     }
@@ -64,9 +65,12 @@ class Motors {
       motor_4.setup(MOTOR_4_IN1,MOTOR_4_IN2);
     }
     void run(int speed=0, int angle=0, int rotation=0) {
+      while (angle<0) angle+=360;
+      while (angle>360) angle-=360;
       speed = constrain(speed,-100,100);
-      int motor_1_4 = angle_to_speed(angle+270)*speed;
-      int motor_2_3 = angle_to_speed(angle)*speed;
+      int motor_1_4 = angle_to_speed(angle)*speed;
+      int motor_2_3 = angle_to_speed(angle+90)*speed;
+      Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation));
       motor_1.run(motor_1_4);
       motor_2.run(motor_2_3);
       motor_3.run(motor_2_3);
