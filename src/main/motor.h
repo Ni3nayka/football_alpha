@@ -54,6 +54,10 @@ class Motors {
     Motor motor_3;
     Motor motor_4;
     void setup() {
+      pinMode(MOTOR_EN_12,OUTPUT);
+      pinMode(MOTOR_EN_34,OUTPUT);
+      digitalWrite(MOTOR_EN_12,1);
+      digitalWrite(MOTOR_EN_34,1);
       motor_1.setup(MOTOR_1_IN1,MOTOR_1_IN2);
       motor_2.setup(MOTOR_2_IN1,MOTOR_2_IN2);
       motor_3.setup(MOTOR_3_IN1,MOTOR_3_IN2);
