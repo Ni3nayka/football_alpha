@@ -36,7 +36,7 @@ class Motor {
 };
 
 
-'''
+/*
 расположение моторов:
 перед сверху, где моторы 1,2
 "перед вращения" (моторов) - считать направление, при котором робот поедет вперед
@@ -45,7 +45,7 @@ class Motor {
 |     |
 \ 3 4 /
  -----
-'''
+*/
 
 class Motors {
   public:
@@ -62,7 +62,7 @@ class Motors {
     void run(int speed=0, int angle=0, int rotation=0) {
       speed = constrain(speed,-100,100);
       int motor_1_4 = angle_to_speed(angle+270)*speed;
-      int motor_1_4 = angle_to_speed(angle)*speed;
+      int motor_2_3 = angle_to_speed(angle)*speed;
       motor_1.run(motor_1_4);
       motor_2.run(motor_2_3);
       motor_3.run(motor_2_3);

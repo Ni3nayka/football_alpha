@@ -8,3 +8,5 @@
 #define MOTOR_3_IN2 4
 #define MOTOR_4_IN1 15
 #define MOTOR_4_IN2 13
+
+#define SOLINOID_PIN 32
