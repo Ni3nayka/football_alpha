@@ -7,8 +7,8 @@
 
 class Pult: public AVOCADO_esp {
   public:
-    int x,y,z,angle,speed;
-    bool punch;
+    int x,y,z,angle,speed,arrow_x,arrow_y;
+    bool punch,boost;
     void setup(float speed_boost=2.0) {
       AVOCADO_esp::setup();
       Pult::speed_boost = speed_boost;
@@ -16,22 +16,14 @@ class Pult: public AVOCADO_esp {
     }
     void update() {
       AVOCADO_esp::update();
-      if (Pult::gamepad_arrow[0]==0 && Pult::gamepad_arrow[1]==0) {
-        Pult::x = Pult::gamepad_joystick[0];
-        Pult::y = -Pult::gamepad_joystick[1];
-        if (!(Pult::gamepad_button[0]||Pult::gamepad_button[1]||Pult::gamepad_button[2]||Pult::gamepad_button[3])) { // если не нажаты кнопки (слева)
-          // без ускорения
-          Pult::x /= Pult::speed_boost;
-          Pult::y /= Pult::speed_boost;
-        }
-      }
-      else {
-        // ускорение стрелками (слева)
-        Pult::x = Pult::gamepad_arrow[0]*100;
-        Pult::y = Pult::gamepad_arrow[1]*100;
-      }
+      Pult::x = Pult::gamepad_joystick[0];
+      Pult::y = -Pult::gamepad_joystick[1];
       Pult::z = Pult::gamepad_joystick[3];
+      Pult::arrow_x = Pult::gamepad_arrow[0];
+      Pult::arrow_y = Pult::gamepad_arrow[1];
+      Pult::boost = Pult::gamepad_button[0]||Pult::gamepad_button[1]||Pult::gamepad_button[2]||Pult::gamepad_button[3];
       Pult::punch = Pult::gamepad_button[4]||Pult::gamepad_button[5]||Pult::gamepad_button[6]||Pult::gamepad_button[7]||Pult::gamepad_button[10]||Pult::gamepad_button[11];
+      // angle
       if (Pult::x==0 && Pult::y==0) Pult::angle = 0;
       else {
         Pult::angle = atan(float(Pult::x)/float(Pult::y))*57.3;

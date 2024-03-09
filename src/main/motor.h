@@ -7,6 +7,8 @@
 
 int channel_pwm = 0;
 
+#define BOOST_MOTOR 1.2
+
 // формулы для омни
 // #define MOTORS_ANGLE_TO_SPEED abs
 
@@ -24,12 +26,13 @@ class Motor {
       channel_pwm+=2;
       // переключаем ШИМы в ноль(чтобы все стояло)
       Motor::run();
+      // Serial.println(Motor::channel);
     }
     void run(int speed=0) {
       speed = constrain(speed,-100,100)*MOTOR_MAP;
-      Serial.println(String(Motor::channel/2+1) + " " + String(speed));
-      ledcWrite(Motor::channel, abs(speed));
-      ledcWrite(Motor::channel+1, abs(-speed));
+      // Serial.println(String(Motor::channel/2+1) + " " + String(speed) + "   " + String(Motor::channel) + " " + String(constrain(speed,0,255)) + "   " + String(Motor::channel+1) + " " + String(constrain(-speed,0,255)));
+      ledcWrite(Motor::channel, constrain(speed,0,255));
+      ledcWrite(Motor::channel+1, constrain(-speed,0,255));
     }
   private:
     //int pin_1, pin_2;
@@ -64,17 +67,43 @@ class Motors {
       motor_3.setup(MOTOR_3_IN1,MOTOR_3_IN2);
       motor_4.setup(MOTOR_4_IN1,MOTOR_4_IN2);
     }
-    void run(int speed=0, int angle=0, int rotation=0) {
+    void run(int speed=0, int angle=0, int rotation=0, int arrow_x=0, int arrow_y=0, bool boost=false) {
+      // подготовка
       while (angle<0) angle+=360;
       while (angle>360) angle-=360;
       speed = constrain(speed,-100,100);
-      int motor_1_4 = angle_to_speed(angle)*speed;
-      int motor_2_3 = angle_to_speed(angle+90)*speed;
-      Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation));
-      motor_1.run(motor_1_4);
-      motor_2.run(motor_2_3);
-      motor_3.run(motor_2_3);
-      motor_4.run(motor_1_4);
+      int motor_1_4=0,motor_2_3=0;
+      // кнопки буста
+      if (!boost) speed /= BOOST_MOTOR;
+      // вперед-назад
+      if (arrow_y==0) { // по джойстику
+        motor_1_4 = angle_to_speed(angle)*speed;
+        motor_2_3 = angle_to_speed(angle+90)*speed;
+      }
+      else {  // по стрелкам
+        motor_1_4 = 70*arrow_y;
+        motor_2_3 = motor_1_4;
+      }
+      if (arrow_x==0 && arrow_y==0) {
+        if (motor_1_4!=0 || motor_2_3!=0) rotation *= 0.04;
+        else rotation*=0.6; // 0.6 0.7
+      }
+      else {
+        if (arrow_y==0) rotation = 70*arrow_x;
+        else rotation *= 0.02;
+      }
+      // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation));
+      motor_1.run(motor_1_4+rotation);
+      motor_2.run(motor_2_3-rotation);
+      motor_3.run(motor_2_3+rotation);
+      motor_4.run(motor_1_4-rotation);
+    }
+
+    void run_basic(int a=0,int b=0,int c=0,int d=0) {
+      motor_1.run(a);
+      motor_2.run(b);
+      motor_3.run(c);
+      motor_4.run(d);
     }
   private:
     float angle_to_speed(int angle) {
