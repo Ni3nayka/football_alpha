@@ -5,31 +5,38 @@
 #include <GyverTimers.h>  // Либа прерываний по таймеру
 #include "FastIO.h"       // Либа быстрого ввода/вывода
 
-#define PWM_DEPTH 15      // Предел счета таймера, определяет разрешение ШИМ
+#define PWM_DEPTH 100      // Предел счета таймера, определяет разрешение ШИМ
 // Можно выбрать от 2 до 254 (больше нельзя)
 // В данном случае ШИМ имеет пределы 0 - 15 (4 бита, 16 градаций)
 
-volatile byte dutyA3 = 0; // Переменные для хранения заполнения ШИМ
-volatile byte dutyA4 = 0; // Можно упаковать в массив при желании
-volatile byte dutyA5 = 0;
-
-void setup() {
-  pinMode(A3, OUTPUT); // Все каналы ШИМ устанавливаются как выходы
-  pinMode(A4, OUTPUT);
-  pinMode(A5, OUTPUT);
-
+void setupSoftWarePWM() {
   Timer2.setFrequency(40000);     // Заводим прерывания таймера 2 на 40кгц
   Timer2.enableISR();             // Вкл. прерывания таймера
 }
 
-void loop() { // Получаем заполнение ШИМ с потенциометров
-  dutyA3++;// = map(analogRead(A0), 0, 1023, 0, ); // У каждого канала свой потенциометр
-  if (dutyA3>PWM_DEPTH) dutyA3 = 0;
-  dutyA4 = 0;
-  dutyA5 = 0;
-  delay(100);  // Других задач нет - можно поставить delay (иначе ставим millis() таймер)
-}
+class SoftWarePWM {
+  public:
+    void setup(int pin) {
+      SoftWarePWM::pin = pin;
+      pinMode(SoftWarePWM::pin, OUTPUT);
+      SoftWarePWM::duty = 0;
+    }
+    void write(int pwm) {
+      if (counter > PWM_DEPTH) {
+      // Переполнение счетчика - все каналы ШИМ устанавливаются в HIGH
+      if (dutyA3 > 0) fastWrite(A3, HIGH); // Устанавливаем HIGH, только если заполнение >0 (быстрый digitalWrite)
+      if (dutyA4 > 0) fastWrite(A4, HIGH); // Решает проблему слабого свечения LED при заполнении = 0
+      fastWrite(A5, HIGH); // Можно и не проверять на 0, если используется электродвигатель или лампа накаливания
+      counter = 0;                // Обнуляем счетчик ВРУЧНУЮ
+    }
 
+    if (counter == dutyA3) fastWrite(A3, LOW); // Проверяем все каналы на совпадение счетчика со значением заполнения
+    if (counter == dutyA4) fastWrite(A4, LOW); // При совпадении переводим канал в состояние LOW
+    if (counter == dutyA5) fastWrite(A5, LOW);
+    }
+  private:
+    byte pin, duty;
+};
 
 /*
    Софтверный ШИМ
@@ -55,4 +62,26 @@ void pwmTick() {
 ISR(TIMER2_A) {
   pwmTick();    // Тикер ШИМ в прерывании таймера (можно перенести код тикера сюда)
 }
+
+// =========================================================================================
+
+volatile byte dutyA3 = 0; // Переменные для хранения заполнения ШИМ
+volatile byte dutyA4 = 0; // Можно упаковать в массив при желании
+volatile byte dutyA5 = 0;
+
+void setup() {
+  pinMode(A3, OUTPUT); // Все каналы ШИМ устанавливаются как выходы
+  pinMode(A4, OUTPUT);
+  pinMode(A5, OUTPUT);
+  setupSoftWarePWM();
+}
+
+void loop() { // Получаем заполнение ШИМ с потенциометров
+  dutyA3++;// = map(analogRead(A0), 0, 1023, 0, ); // У каждого канала свой потенциометр
+  if (dutyA3>PWM_DEPTH) dutyA3 = 0;
+  dutyA4 = 0;
+  dutyA5 = 0;
+  delay(100);  // Других задач нет - можно поставить delay (иначе ставим millis() таймер)
+}
+
 
