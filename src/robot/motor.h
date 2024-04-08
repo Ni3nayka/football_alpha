@@ -23,6 +23,7 @@ class Motor {
       // Serial.println(String(Motor::channel/2+1) + " " + String(speed) + "   " + String(Motor::channel) + " " + String(constrain(speed,0,255)) + "   " + String(Motor::channel+1) + " " + String(constrain(-speed,0,255)));
       // ledcWrite(Motor::channel, constrain(speed,0,255));
       // ledcWrite(Motor::channel+1, constrain(-speed,0,255));
+      Serial.println(speed);
     }
   private:
     int pin_1, pin_2;

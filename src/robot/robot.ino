@@ -5,23 +5,25 @@
 Motors motors;
 
 #include <Trackduino_bluetooth.h>
-Bluetooth bluetooth;            // создадим объект для управления блютузом
+Bluetooth bluetooth;
 
 void setup() {
-  // motor
-
-  pinMode(A3, OUTPUT); // Все каналы ШИМ устанавливаются как выходы
-  pinMode(A4, OUTPUT);
-  pinMode(A5, OUTPUT);
+  Serial.begin(9600);
   setupSoftWarePWM();
 
 
   bluetooth.setup();            // инициализируем блютуз
 
-  Serial.begin(9600);
   motors.setup();
   pinMode(SOLINOID_PIN,OUTPUT);
   digitalWrite(SOLINOID_PIN,0);
+}
+
+void loop() {
+  for (int i = -100; i<=100; i++) {
+    motors.motor_1.run(i);
+    delay(20);
+  }
 }
 
 /*void loop() {
@@ -33,7 +35,7 @@ void setup() {
   // pult.test_print_operation();
 }*/
 
-void loop() { // Получаем заполнение ШИМ с потенциометров
+void loop1() { // Получаем заполнение ШИМ с потенциометров
   dutyA3++;// = map(analogRead(A0), 0, 1023, 0, ); // У каждого канала свой потенциометр
   if (dutyA3>PWM_DEPTH) dutyA3 = 0;
   dutyA4 = 0;
