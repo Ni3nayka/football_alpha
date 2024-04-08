@@ -1,9 +1,6 @@
 #pragma once
 
-// устанавливаем настройки формирования ШИМ
-#define MOTOR_PWM_HZ 15000 // частота ШИМ
-#define MOTOR_BITS 8 // разрядность (для управления) ШИМ
-#define MOTOR_MAP 2.5 // для перевода скорости из размерности 100 в размерность в соответствии с MOTOR_BITS (8 бит => 255 "ШИМ" ~ 250)
+#define MOTOR_MAP 1 // для перевода скорости из размерности 100 в размерность в соответствии с MOTOR_BITS (8 бит => 255 "ШИМ" ~ 250)
 
 int channel_pwm = 0;
 
@@ -15,28 +12,20 @@ int channel_pwm = 0;
 class Motor {
   public:
     void setup(int pin_1, int pin_2) {
-      // настраиваем ШИМ в соответствии с ранее указанными настройками
-      ledcSetup(channel_pwm, MOTOR_PWM_HZ, MOTOR_BITS);
-      ledcSetup(channel_pwm+1, MOTOR_PWM_HZ, MOTOR_BITS);
-      // назначаем контакт и канал для формирования ШИМ
-      ledcAttachPin(pin_1, channel_pwm);
-      ledcAttachPin(pin_2, channel_pwm+1);
-      // "занимаем" каналы ШИМ
-      Motor::channel = channel_pwm;
-      channel_pwm+=2;
-      // переключаем ШИМы в ноль(чтобы все стояло)
+      Motor::pin_1 = pin_1;
+      Motor::pin_2 = pin_2;
+      pinMode(Motor::pin_1,OUTPUT);
+      pinMode(Motor::pin_2,OUTPUT);
       Motor::run();
-      // Serial.println(Motor::channel);
     }
     void run(int speed=0) {
       speed = constrain(speed,-100,100)*MOTOR_MAP;
       // Serial.println(String(Motor::channel/2+1) + " " + String(speed) + "   " + String(Motor::channel) + " " + String(constrain(speed,0,255)) + "   " + String(Motor::channel+1) + " " + String(constrain(-speed,0,255)));
-      ledcWrite(Motor::channel, constrain(speed,0,255));
-      ledcWrite(Motor::channel+1, constrain(-speed,0,255));
+      // ledcWrite(Motor::channel, constrain(speed,0,255));
+      // ledcWrite(Motor::channel+1, constrain(-speed,0,255));
     }
   private:
-    //int pin_1, pin_2;
-    int channel; // channel_pwm
+    int pin_1, pin_2;
 };
 
 
