@@ -11,3 +11,5 @@
 
 #define SOLENOID_PIN 3
 
+#define BLUETOOTH_RX 8
+#define BLUETOOTH_TX 7
