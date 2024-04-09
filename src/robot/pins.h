@@ -9,5 +9,5 @@
 #define MOTOR_4_IN2 A6
 #define MOTOR_4_IN1 A7
 
-#define SOLINOID_PIN 3
+#define SOLENOID_PIN 3
 

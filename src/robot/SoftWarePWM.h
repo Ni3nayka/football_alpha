@@ -9,12 +9,6 @@
 // Можно выбрать от 2 до 254 (больше нельзя)
 // В данном случае ШИМ имеет пределы 0 - 15 (4 бита, 16 градаций)
 
-
-volatile byte dutyA3 = 0; // Переменные для хранения заполнения ШИМ
-volatile byte dutyA4 = 0; // Можно упаковать в массив при желании
-volatile byte dutyA5 = 0;
-int counter = 0;
-
 void setupSoftWarePWM() {
   Timer2.setFrequency(40000);     // Заводим прерывания таймера 2 на 40кгц
   Timer2.enableISR();             // Вкл. прерывания таймера
@@ -26,46 +20,28 @@ class SoftWarePWM {
       SoftWarePWM::pin = pin;
       pinMode(SoftWarePWM::pin, OUTPUT);
       SoftWarePWM::duty = 0;
+      SoftWarePWM::counter = 0;
     }
     void write(int pwm) {
-      if (counter > PWM_DEPTH) {
-      // Переполнение счетчика - все каналы ШИМ устанавливаются в HIGH
-      if (dutyA3 > 0) fastWrite(A3, HIGH); // Устанавливаем HIGH, только если заполнение >0 (быстрый digitalWrite)
-      if (dutyA4 > 0) fastWrite(A4, HIGH); // Решает проблему слабого свечения LED при заполнении = 0
-      fastWrite(A5, HIGH); // Можно и не проверять на 0, если используется электродвигатель или лампа накаливания
-      counter = 0;                // Обнуляем счетчик ВРУЧНУЮ
+      SoftWarePWM::duty = pwm;
+      SoftWarePWM::write_update();
     }
-
-    if (counter == dutyA3) fastWrite(A3, LOW); // Проверяем все каналы на совпадение счетчика со значением заполнения
-    if (counter == dutyA4) fastWrite(A4, LOW); // При совпадении переводим канал в состояние LOW
-    if (counter == dutyA5) fastWrite(A5, LOW);
+    void write_update() {
+      if (SoftWarePWM::counter > PWM_DEPTH) {
+        // Переполнение счетчика - все каналы ШИМ устанавливаются в HIGH
+        // if (dutyA4 > 0) fastWrite(A4, HIGH); // Решает проблему слабого свечения LED при заполнении = 0, можно и не проверять на 0, если используется электродвигатель или лампа накаливания
+        fastWrite(SoftWarePWM::pin, HIGH);
+        SoftWarePWM::counter = 0; // Обнуляем счетчик ВРУЧНУЮ
+      }
+      if (SoftWarePWM::counter == SoftWarePWM::duty) fastWrite(SoftWarePWM::pin, LOW); 
+      SoftWarePWM::counter++;
     }
   private:
     byte pin, duty;
+    volatile uint8_t counter;
 };
 
-/*
-   Софтверный ШИМ
-*/
-void pwmTick() {
-  static volatile uint8_t counter = 0;  // Счетчик
-
-  if (counter > PWM_DEPTH) {
-    // Переполнение счетчика - все каналы ШИМ устанавливаются в HIGH
-    if (dutyA3 > 0) fastWrite(A3, HIGH); // Устанавливаем HIGH, только если заполнение >0 (быстрый digitalWrite)
-    if (dutyA4 > 0) fastWrite(A4, HIGH); // Решает проблему слабого свечения LED при заполнении = 0
-    fastWrite(A5, HIGH); // Можно и не проверять на 0, если используется электродвигатель или лампа накаливания
-    counter = 0;                // Обнуляем счетчик ВРУЧНУЮ
-  }
-
-  if (counter == dutyA3) fastWrite(A3, LOW); // Проверяем все каналы на совпадение счетчика со значением заполнения
-  if (counter == dutyA4) fastWrite(A4, LOW); // При совпадении переводим канал в состояние LOW
-  if (counter == dutyA5) fastWrite(A5, LOW);
-
-  counter++;                                        // Инкремент счетчика
-}
-
-ISR(TIMER2_A) {
-  pwmTick();    // Тикер ШИМ в прерывании таймера (можно перенести код тикера сюда)
-}
-
+// SoftWarePWM pin;
+// ISR(TIMER2_A) {
+//   pin.write_update();
+// }
