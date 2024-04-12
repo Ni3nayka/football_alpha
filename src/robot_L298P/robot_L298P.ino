@@ -1,17 +1,9 @@
-#include "pins.h"
-#include "motor.h"
 #include "devices.h"
-
-#include <SoftwareSerial.h>
-SoftwareSerial btSerial(BLUETOOTH_RX, BLUETOOTH_TX);
-#define BT_Serial btSerial 
-#include <Trackduino_bluetooth.h>
-Bluetooth bluetooth;
 
 void setup() {
   Serial.begin(9600);
   bluetooth.setup();
-  motors.setup();
+  motors.setup(); // (0.9,0.8,1.0,0,7)
   solenoid.setup();
   test_motor();
 }
@@ -60,7 +52,7 @@ void loop_bluetooth() {
   //bool punch = abs(bluetooth.ay)>50;
   if (punch) solenoid.punch();
   // test
-  Serial.println("speed: " + String(speed) + "   " + "angle: " + String(angle) + "   " + "rotate: " + String(rotate) + "   " + "punch: " + String(punch));
+  // Serial.println("speed: " + String(speed) + "   " + "angle: " + String(angle) + "   " + "rotate: " + String(rotate) + "   " + "punch: " + String(punch));
 }
 
 

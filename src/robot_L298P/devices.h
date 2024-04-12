@@ -1,5 +1,14 @@
 #pragma once
 
+#include "pins.h"
+#include "motor.h"
+
+#include <SoftwareSerial.h>
+SoftwareSerial btSerial(BLUETOOTH_RX, BLUETOOTH_TX);
+#define BT_Serial btSerial 
+#include <Trackduino_bluetooth.h>
+Bluetooth bluetooth;
+
 class Solenoid {
   public:
     void setup() {
