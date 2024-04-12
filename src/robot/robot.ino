@@ -11,8 +11,58 @@ Bluetooth bluetooth;
 void setup() {
   Serial.begin(9600);
   bluetooth.setup();
-  motors.setup();
+  // motors.setup();
   solenoid.setup();
+  test_motor();
+}
+
+void test_motor() {
+  pinMode(A0, OUTPUT);
+  pinMode(A1, OUTPUT);
+  pinMode(A2, OUTPUT);
+  pinMode(A3, OUTPUT);
+  pinMode(A4, OUTPUT);
+  pinMode(A5, OUTPUT);
+  pinMode(A6, OUTPUT);
+  pinMode(A7, OUTPUT);
+
+  digitalWrite(A0,1);
+  digitalWrite(A1,0);
+  digitalWrite(A2,1);
+  digitalWrite(A3,0);
+  digitalWrite(A4,1);
+  digitalWrite(A5,0);
+  digitalWrite(A6,1);
+  digitalWrite(A7,0);
+  delay(5000);
+  digitalWrite(A0,0);
+  digitalWrite(A1,1);
+  digitalWrite(A2,0);
+  digitalWrite(A3,1);
+  digitalWrite(A4,0);
+  digitalWrite(A5,1);
+  digitalWrite(A6,0);
+  digitalWrite(A7,1);
+  delay(5000);
+  digitalWrite(A0,0);
+  digitalWrite(A1,0);
+  digitalWrite(A2,0);
+  digitalWrite(A3,0);
+  digitalWrite(A4,0);
+  digitalWrite(A5,0);
+  digitalWrite(A6,0);
+  digitalWrite(A7,0);
+  delay(5000);
+
+  // motors.motor_1.run(-100);
+  // motors.motor_2.run(-100);
+  // motors.motor_3.run(-100);
+  // motors.motor_4.run(-100);
+  // delay(5000);
+  // motors.motor_1.run(0);
+  // motors.motor_2.run(0);
+  // motors.motor_3.run(0);
+  // motors.motor_4.run(0);
 }
 
 void loop() {
@@ -47,7 +97,7 @@ void loop_bluetooth() {
   //bool punch = abs(bluetooth.ay)>50;
   if (punch) solenoid.punch();
   // test
-  // Serial.println("speed: " + String(speed) + "   " + "angle: " + String(angle) + "   " + "rotate: " + String(rotate));
+  Serial.println("speed: " + String(speed) + "   " + "angle: " + String(angle) + "   " + "rotate: " + String(rotate) + "   " + "punch: " + String(punch));
 }
 
 
