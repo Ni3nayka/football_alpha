@@ -27,16 +27,16 @@ class SoftWarePWM {
       SoftWarePWM::write_update();
     }
     void write_update() {
-      if (SoftWarePWM::duty==0) digitalWrite(SoftWarePWM::pin, LOW); 
-      else {
-        if (SoftWarePWM::counter > PWM_DEPTH) {
-          // Переполнение счетчика - все каналы ШИМ устанавливаются в HIGH
-          // if (dutyA4 > 0) fastWrite(A4, HIGH); // Решает проблему слабого свечения LED при заполнении = 0, можно и не проверять на 0, если используется электродвигатель или лампа накаливания
-          fastWrite(SoftWarePWM::pin, HIGH);
-          SoftWarePWM::counter = 0; // Обнуляем счетчик ВРУЧНУЮ
-        }
-        if (SoftWarePWM::counter == SoftWarePWM::duty) fastWrite(SoftWarePWM::pin, LOW); 
+      // if (SoftWarePWM::duty==0) digitalWrite(SoftWarePWM::pin, LOW); 
+      // else {
+      if (SoftWarePWM::counter > PWM_DEPTH) {
+        // Переполнение счетчика - все каналы ШИМ устанавливаются в HIGH
+        // if (dutyA4 > 0) fastWrite(A4, HIGH); // Решает проблему слабого свечения LED при заполнении = 0, можно и не проверять на 0, если используется электродвигатель или лампа накаливания
+        fastWrite(SoftWarePWM::pin, HIGH);
+        SoftWarePWM::counter = 0; // Обнуляем счетчик ВРУЧНУЮ
       }
+      if (SoftWarePWM::counter == SoftWarePWM::duty) fastWrite(SoftWarePWM::pin, LOW); 
+      // }
       SoftWarePWM::counter++;
     }
   private:
