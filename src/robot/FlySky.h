@@ -12,6 +12,15 @@
 
 #pragma once
 
+unsigned long int pulseIn1(int pin, bool state, unsigned long int timeout=10000) {
+  unsigned long int t = micros();
+  while (digitalRead(pin)==state && micros()-t<timeout);
+  t = micros();
+  while (digitalRead(pin)!=state && micros()-t<timeout);
+  while (digitalRead(pin)==state && micros()-t<timeout);
+  return micros() - t;
+}
+
 class MyFlySky {
   public:
     void setup() {
@@ -23,10 +32,10 @@ class MyFlySky {
       pinMode(FLYSKY_BUTTON_SWD, INPUT);
     }
     int readChannel(byte channelPin, int minLimit=-100, int maxLimit=100, int defaultValue=0) {
-      // uint16_t ch = pulseIn(channelPin, HIGH, 30000);
-      // if (ch < 100) return defaultValue;
-      // return map(ch, 1000, 2000, minLimit, maxLimit);
-      return pulseIn(channelPin, HIGH, 30000);
+      uint16_t ch = pulseIn1(channelPin, HIGH, 30000);
+      if (ch < 100) return defaultValue;
+      return map(ch, 1000, 2000, minLimit, maxLimit);
+      // return pulseIn(channelPin, HIGH, 30000);
     }
   private:
 };

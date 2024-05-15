@@ -64,5 +64,3 @@ void flySky_main() {
   delay(10);
 }
 
-
-
