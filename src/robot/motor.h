@@ -56,7 +56,7 @@ class Motors {
     Motor motor_3;
     Motor motor_4;
     void setup() {
-      setupSoftWarePWM();
+      // setupSoftWarePWM();
       Motors::motor_1.setup(MOTOR_1_IN1,MOTOR_1_IN2);
       Motors::motor_2.setup(MOTOR_2_IN1,MOTOR_2_IN2);
       Motors::motor_3.setup(MOTOR_3_IN1,MOTOR_3_IN2);
@@ -90,10 +90,3 @@ class Motors {
 };
 
 Motors motors;
-
-ISR(TIMER2_A) {
-  motors.motor_1.update_pwm();
-  motors.motor_2.update_pwm();
-  motors.motor_3.update_pwm();
-  motors.motor_4.update_pwm();
-}

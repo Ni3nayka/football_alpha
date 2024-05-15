@@ -3,48 +3,62 @@
 
 #pragma once
 
-#include <GyverTimers.h>  // Либа прерываний по таймеру
 #include "FastIO.h"       // Либа быстрого ввода/вывода
-#define PWM_DEPTH 100      // Предел счета таймера, определяет разрешение ШИМ
+
+#define PWM_HZ 100      // частота ШИМ
+const int SOFT_PWM_TIME_DELTA = 1000/PWM_HZ;
+
 // Можно выбрать от 2 до 254 (больше нельзя)
 // В данном случае ШИМ имеет пределы 0 - 15 (4 бита, 16 градаций)
 
-void setupSoftWarePWM() {
-  Timer2.setFrequency(40000);     // Заводим прерывания таймера 2 на 40кгц
-  Timer2.enableISR();             // Вкл. прерывания таймера
+#define MAX_SOFT_PWM 8
+int _not_using_soft_pwm_pins[MAX_SOFT_PWM] = {0};
+int _not_using_soft_pwm_value[MAX_SOFT_PWM] = {0};
+unsigned long int _not_using_soft_pwm_timer_pin[MAX_SOFT_PWM] = {0};
+int _not_using_soft_pwm_counter = 0;
+unsigned long int _not_using_soft_pwm_time = 0;
+
+void pwmUpdate() {
+  if (_not_using_soft_pwm_time<millis()) {
+    // enable
+    for (int i = 0; i<_not_using_soft_pwm_counter; i++) {
+      fastWrite(_not_using_soft_pwm_pins[i],1);
+      _not_using_soft_pwm_timer_pin[i] = millis() + _not_using_soft_pwm_value[i];
+    }
+    _not_using_soft_pwm_time = millis() + SOFT_PWM_TIME_DELTA;
+  } else {
+    // disable
+    for (int i = 0; i<_not_using_soft_pwm_counter; i++) {
+      if (_not_using_soft_pwm_timer_pin[i]<millis()) 
+        fastWrite(_not_using_soft_pwm_pins[i],0);
+    }
+  }
+  
 }
 
 class SoftWarePWM {
   public:
     void setup(int pin) {
-      SoftWarePWM::pin = pin;
-      pinMode(SoftWarePWM::pin, OUTPUT);
-      SoftWarePWM::duty = 0;
-      SoftWarePWM::counter = 0;
+      if (_not_using_soft_pwm_counter<MAX_SOFT_PWM) {
+        SoftWarePWM::number = _not_using_soft_pwm_counter;
+        pinMode(pin, OUTPUT);
+        _not_using_soft_pwm_pins[_not_using_soft_pwm_counter] = pin;
+        _not_using_soft_pwm_value[_not_using_soft_pwm_counter] = 0;
+        _not_using_soft_pwm_counter++;
+      } else {
+        SoftWarePWM::number = -1;
+      }
     }
     void write(int pwm) {
-      SoftWarePWM::duty = pwm;
-      SoftWarePWM::write_update();
+      // pwm = [-100,100]
+      if (SoftWarePWM::number!=-1) {
+        pwm = constrain(pwm,-100,100)/10;
+        _not_using_soft_pwm_value[SoftWarePWM::number] = pwm;
+      }
     }
     void write_update() {
-      // if (SoftWarePWM::duty==0) digitalWrite(SoftWarePWM::pin, LOW); 
-      // else {
-      if (SoftWarePWM::counter > PWM_DEPTH) {
-        // Переполнение счетчика - все каналы ШИМ устанавливаются в HIGH
-        // if (dutyA4 > 0) fastWrite(A4, HIGH); // Решает проблему слабого свечения LED при заполнении = 0, можно и не проверять на 0, если используется электродвигатель или лампа накаливания
-        fastWrite(SoftWarePWM::pin, HIGH);
-        SoftWarePWM::counter = 0; // Обнуляем счетчик ВРУЧНУЮ
-      }
-      if (SoftWarePWM::counter == SoftWarePWM::duty) fastWrite(SoftWarePWM::pin, LOW); 
-      // }
-      SoftWarePWM::counter++;
+      pwmUpdate();
     }
   private:
-    byte pin, duty;
-    volatile uint8_t counter;
+    int number;
 };
-
-// SoftWarePWM pin;
-// ISR(TIMER2_A) {
-//   pin.write_update();
-// }
