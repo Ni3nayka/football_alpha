@@ -16,13 +16,13 @@ void setup() {
   Serial.begin(9600);
   motors.setup();
   solenoid.setup();
-  FlySky.begin(Serial3); // Serial3
+  FlySky.setup();
   //motor_tester();
   motors.run(0,0,0,0);
 }
 
 void loop() {
-  flySky_main();
+  flySky_test();
 }
 
 void motor_tester() {
@@ -32,12 +32,29 @@ void motor_tester() {
   motors.run(0,0,0,0);
 }
 
+void flySky_test() {
+  Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X));
+  Serial.print(" ");
+  Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_Y));
+  Serial.print(" ");
+  Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_X));
+  Serial.print(" ");
+  Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y));
+  Serial.print(" ");
+  Serial.print(FlySky.readChannel(FLYSKY_BUTTON_SWA));
+  Serial.print(" ");
+  Serial.print(FlySky.readChannel(FLYSKY_BUTTON_SWD));
+  Serial.println();
+  delay(10);
+}
+
 void flySky_main() {
-  for (int i = 0; i<14; i++) Serial.print(String(FlySky.readChannel(i)) + " "); Serial.println();
-  int joystick_left_y = FlySky.readChannel(2);
-  int joystick_left_x = FlySky.readChannel(3);
-  int joystick_right_y = FlySky.readChannel(1);
-  int joystick_right_x = FlySky.readChannel(0);
+  // for (int i = 0; i<14; i++) Serial.print(String(FlySky.readChannel(i)) + " "); Serial.println();
+  // int joystick_left_y = FlySky.readChannel(2);
+  // int joystick_left_x = FlySky.readChannel(3);
+  // int joystick_right_y = FlySky.readChannel(1);
+  // int joystick_right_x = FlySky.readChannel(0);
+  // motors.motor_1.run(FlySky.readChannel(0));
   // int forward = joystick_right_y*EXACT_FORWARD_K + (joystick_left_y+100)/2;
   // int turn = (joystick_left_x + joystick_right_x)*TURN_K;
   // int left_speed = forward + turn;
