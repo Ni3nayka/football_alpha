@@ -14,33 +14,44 @@
 
 void setup() {
   Serial.begin(9600);
-  motors.setup();
+  // motors.setup();
   solenoid.setup();
   FlySky.setup();
   //motor_tester();
-  // motors.run(0,0,0,0);
+  motorsRun(0,0,0,0);
+  // motor_tester();
 }
 
 long int t = 0;
 
 void loop() {
   if (t<millis()) {
-    motors.motor_1.run(FlySky.readChannel(FLYSKY_BUTTON_SWA)*1.1);
+    // motors.motor_1.run(FlySky.readChannel(FLYSKY_BUTTON_SWA)*1.1);
     t = millis() + 200;
   }
   // flySky_main();
   // Serial.println(FlySky.readChannel(2));
   // motors.motor_1.run(FlySky.readChannel(FLYSKY_BUTTON_SWA));
-  pwmUpdate();
+  // pwmUpdate();
   // flySky_test();
+  motor_test();
 }
 
-// void motor_tester() {
-//   motors.run(100,100,100,100); delay(500);
-//   motors.run(40,40,40,40); delay(500);
-//   motors.run(-100,-100,-100,-100); delay(500);
-//   motors.run(0,0,0,0);
-// }
+void motor_test() {
+  for (int i = -100; i<100; i++) {
+    motor_4.start(i);
+    // Serial.println(i);
+    if (abs(i)>98) delay(1000);
+    delay(100);
+  }
+}
+
+void motor_tester() {
+  motorsRun(100,100,100,100); delay(2000);
+  motorsRun(40,40,40,40); delay(2000);
+  motorsRun(-100,-100,-100,-100); delay(2000);
+  motorsRun(0,0,0,0);
+}
 
 void flySky_test() {
   Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X));
