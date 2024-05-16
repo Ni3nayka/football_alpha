@@ -35,6 +35,7 @@ public:
     GY25::absolute_x = 0;
     GY25::absolute_x_correction = 0;
     GY25::absolute_x_old = 0;
+    delay(3000);
   }
 
   void calibration() {
