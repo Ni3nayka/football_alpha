@@ -1,13 +1,13 @@
 #pragma once
 
-#include <SoftwareSerial.h>
+/*#include <SoftwareSerial.h>
 SoftwareSerial btSerial(BLUETOOTH_RX, BLUETOOTH_TX);
 #define BT_Serial btSerial 
 #include <Trackduino_bluetooth.h>
 Bluetooth bluetooth;
 
-// bluetooth.setup();
-// loop_bluetooth();
+bluetooth.setup();
+loop_bluetooth();
 
 void loop_bluetooth() {
   bluetooth.update();
@@ -30,9 +30,9 @@ void loop_bluetooth() {
   if (punch) solenoid.punch();
   // test
   Serial.println("speed: " + String(speed) + "   " + "angle: " + String(angle) + "   " + "rotate: " + String(rotate) + "   " + "punch: " + String(punch));
-}
+}*/
 
-void test_motor() {
+void test_motor_pins() {
   pinMode(A0, OUTPUT);
   pinMode(A1, OUTPUT);
   pinMode(A2, OUTPUT);
@@ -79,4 +79,52 @@ void test_motor() {
   // motors.motor_2.run(0);
   // motors.motor_3.run(0);
   // motors.motor_4.run(0);
+}
+
+void flySky_main_vector() {
+  // for (int i = 0; i<14; i++) Serial.print(String(FlySky.readChannel(i)) + " "); Serial.println();
+  // int joystick_left_y = FlySky.readChannel(2);
+  // int joystick_left_x = FlySky.readChannel(3);
+  // int joystick_right_y = FlySky.readChannel(1);
+  // int joystick_right_x = FlySky.readChannel(0);
+  // motors.motor_1.run(FlySky.readChannel(0));
+  // int forward = joystick_right_y*EXACT_FORWARD_K + (joystick_left_y+100)/2;
+  // int turn = (joystick_left_x + joystick_right_x)*TURN_K;
+  // int left_speed = forward + turn;
+  // int right_speed = forward - turn;
+  // Serial.println(String(left_speed) + " " + String(right_speed));
+  // MotorShield.motors(left_speed, right_speed);
+  delay(10);
+}
+
+void motor_test() {
+  for (int i = -100; i<100; i++) {
+    motor_1.start(i);
+    // Serial.println(i);
+    if (abs(i)>98) delay(1000);
+    delay(100);
+  }
+}
+
+void motor_tester() {
+  motorsRun(100,100,100,100); delay(2000);
+  motorsRun(40,40,40,40); delay(2000);
+  motorsRun(-100,-100,-100,-100); delay(2000);
+  motorsRun(0,0,0,0);
+}
+
+void flySky_test() {
+  Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X));
+  Serial.print(" ");
+  Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_Y));
+  Serial.print(" ");
+  Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_X));
+  Serial.print(" ");
+  Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y));
+  Serial.print(" ");
+  Serial.print(FlySky.readChannel(FLYSKY_BUTTON_SWA));
+  Serial.print(" ");
+  Serial.print(FlySky.readChannel(FLYSKY_BUTTON_SWD));
+  Serial.println();
+  // delay(10);
 }

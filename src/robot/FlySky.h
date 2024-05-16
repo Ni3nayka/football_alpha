@@ -22,10 +22,12 @@ class MyFlySky {
       pinMode(FLYSKY_BUTTON_SWA, INPUT);
       pinMode(FLYSKY_BUTTON_SWD, INPUT);
     }
-    int readChannel(int channelInput, int minLimit=-100, int maxLimit=100, int defaultValue=0){
+    int readChannel(int channelInput, int minLimit=-100, int maxLimit=100, int defaultValue=0, int minValue=5){
       int ch = pulseIn(channelInput, HIGH, 30000);
       if (ch < 100) return defaultValue;
-      return map(ch, 1000, 2000, minLimit, maxLimit);
+      ch = map(ch, 1000, 2000, minLimit, maxLimit);
+      if (abs(ch)<minValue) return 0;
+      return ch;
     }
   private:
 };

@@ -21,7 +21,7 @@ class Motor: public AF_DCMotor {
     void start(int speed=0) {
       speed = constrain(speed,-100,100)*MOTOR_MAP;
       Motor::setSpeed(abs(speed));
-      Serial.println(speed);
+      // Serial.println(speed);
       Motor::run(speed>0?FORWARD:(speed<0?BACKWARD:RELEASE));
     }
     void stop() {
