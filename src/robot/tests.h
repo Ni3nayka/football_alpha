@@ -32,7 +32,7 @@ void loop_bluetooth() {
   Serial.println("speed: " + String(speed) + "   " + "angle: " + String(angle) + "   " + "rotate: " + String(rotate) + "   " + "punch: " + String(punch));
 }*/
 
-void test_motor_pins() {
+void testMotorPins() {
   pinMode(A0, OUTPUT);
   pinMode(A1, OUTPUT);
   pinMode(A2, OUTPUT);
@@ -81,7 +81,7 @@ void test_motor_pins() {
   // motors.motor_4.run(0);
 }
 
-void flySky_main_vector() {
+void flySkyMainVector() {
   // for (int i = 0; i<14; i++) Serial.print(String(FlySky.readChannel(i)) + " "); Serial.println();
   // int joystick_left_y = FlySky.readChannel(2);
   // int joystick_left_x = FlySky.readChannel(3);
@@ -97,7 +97,7 @@ void flySky_main_vector() {
   delay(10);
 }
 
-void motor_test() {
+void motorTest() {
   for (int i = -100; i<100; i++) {
     motor_1.start(i);
     // Serial.println(i);
@@ -106,14 +106,14 @@ void motor_test() {
   }
 }
 
-void motor_tester() {
+void motorTester() {
   motorsRun(100,100,100,100); delay(2000);
   motorsRun(40,40,40,40); delay(2000);
   motorsRun(-100,-100,-100,-100); delay(2000);
   motorsRun(0,0,0,0);
 }
 
-void flySky_test() {
+void flySkyTest() {
   Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X));
   Serial.print(" ");
   Serial.print(FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_Y));
@@ -127,4 +127,11 @@ void flySky_test() {
   Serial.print(FlySky.readChannel(FLYSKY_BUTTON_SWD));
   Serial.println();
   // delay(10);
+}
+
+void gyroTest() {
+  if (gy_25_time < millis()) {
+    gy25.print();
+    gy_25_time = millis() + 100;
+  }
 }

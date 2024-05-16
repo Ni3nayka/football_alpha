@@ -2,6 +2,12 @@
 #include "motor.h"
 #include "devices.h"
 #include "FlySky.h"
+
+#include "GY-25.h"
+GY25 gy25(9, 10); // RX, TX
+unsigned long int gy_25_time = 0;
+unsigned long int flysky_update_time = 0;
+
 #include "tests.h"
 
 /* расположение моторов:
@@ -15,19 +21,25 @@
 
 void setup() {
   Serial.begin(9600);
+  gy25.setup();
   solenoid.setup();
   FlySky.setup();
   motorsRun(0,0,0,0);
-  // motor_tester();
+  // motorTester();
 }
 
 void loop() {
-  flySky_main();
-  // flySky_test();
-  // motor_test();
+  gy25.update();
+  // gyroTest();
+  if (flysky_update_time<millis()) {
+    flySkyMain();
+    // flySkyTest();
+    flysky_update_time = millis() + 50;
+  }
+  // motorTest();
 }
 
-void flySky_main() {
+void flySkyMain() {
   int y = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
   int x = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
   int rotation = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
