@@ -25,12 +25,16 @@ void loop() {
 class GY25: private SoftwareSerial {  //(): public SoftwareSerial {
 public:
   int angle[3];
+  long int absolute_x;
 
   void setup() {
     GY25::begin(115200);
     delay(1000);
     GY25::write(0XA5);  // request the data
     GY25::write(0X52);
+    GY25::absolute_x = 0;
+    GY25::absolute_x_correction = 0;
+    GY25::absolute_x_old = 0;
   }
 
   void calibration() {
@@ -63,6 +67,11 @@ public:
         GY25::angle[0] = (GY25::Re_buf[1] << 8 | GY25::Re_buf[2]) / 100;
         GY25::angle[1] = (GY25::Re_buf[3] << 8 | GY25::Re_buf[4]) / 100;
         GY25::angle[2] = (GY25::Re_buf[5] << 8 | GY25::Re_buf[6]) / 100;
+        int x = GY25::angle[0];
+        if (x>100 && GY25::absolute_x_old<-100) GY25::absolute_x_correction -= 360;
+        if (x<-100 && GY25::absolute_x_old>100) GY25::absolute_x_correction += 360;
+        GY25::absolute_x_old = x;
+        GY25::absolute_x = x + GY25::absolute_x_correction;
         //GY25::print();
       }
     }
@@ -74,6 +83,8 @@ public:
     Serial.print(GY25::angle[1]);
     Serial.print(" ");
     Serial.print(GY25::angle[2]);
+    Serial.print(" ");
+    Serial.print(GY25::absolute_x);
     Serial.println();
   }
 private:
@@ -81,4 +92,5 @@ private:
   unsigned char counter = 0;  //buffer where the received data will be stored
   unsigned char sign = 0;
   unsigned char Re_buf[8];
+  long int absolute_x_correction,absolute_x_old;
 };
