@@ -23,11 +23,11 @@ void setup() {
 
 void loop() {
   // FlySky.test();
-  int x = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
+  int x = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X)*0.4;
   int y = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
   bool punch = FlySky.readChannel(FLYSKY_BUTTON_SWA)>0 || FlySky.readChannel(FLYSKY_BUTTON_SWD)>0;
   // Serial.println(String(y)+" "+String(x)+" "+String(punch));
-  motors.run(x+y,x-y);
+  motors.run(y-x,y+x);
   if (punch) solenoidPunch();
 }
 
