@@ -1,10 +1,5 @@
 #pragma once
 
-#define PWM_RIGHT 10 
-#define DIR_RIGHT 12
-#define PWM_LEFT  11
-#define DIR_LEFT  13
-
 #define MOTOR_MAP 2.5 // для перевода скорости из размерности 100 в размерность в соответствии с MOTOR_BITS (8 бит => 255 "ШИМ" ~ 250)
 
 class Motor {
@@ -41,15 +36,21 @@ class Motor {
 
 class Motors {
   public:
-    Motor motor_l;
-    Motor motor_r;
+    Motor motor_1;
+    Motor motor_2;
+    Motor motor_3;
+    Motor motor_4;
     void setup() {
-      motor_l.setup(DIR_LEFT,PWM_LEFT);
-      motor_r.setup(DIR_RIGHT,PWM_RIGHT);
+      motor_1.setup(MOTOR_1_DIR,MOTOR_1_PWM);
+      motor_2.setup(MOTOR_2_DIR,MOTOR_2_PWM);
+      motor_3.setup(MOTOR_3_DIR,MOTOR_3_PWM);
+      motor_4.setup(MOTOR_4_DIR,MOTOR_4_PWM);
     }
-    void run(int l=0,int r=0) {
-      motor_l.run(l);
-      motor_r.run(r);
+    void run(int a=0,int b=0,int c=0,int d=0) {
+      motor_1.run(a);
+      motor_2.run(b);
+      motor_3.run(c);
+      motor_4.run(d);
     }
   private:
 };

@@ -7,10 +7,11 @@
    modify: May 2024
 */
 
+#include "pins.h"
 #include "motor.h"
 #include "FlySky.h"
 
-#define SOLENOID_PIN 2
+bool global_punch_one_old = 0;
 
 void setup() {
   // Serial.begin(9600);
@@ -18,21 +19,38 @@ void setup() {
   motors.setup();
   pinMode(SOLENOID_PIN,OUTPUT);
   digitalWrite(SOLENOID_PIN,0);
+  // testMotors();
   motors.run();
 }
 
 void loop() {
   // FlySky.test();
-  int x = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X)*0.4;
+  int x = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
   int y = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
-  bool punch = FlySky.readChannel(FLYSKY_BUTTON_SWA)>0 || FlySky.readChannel(FLYSKY_BUTTON_SWD)>0;
+  int rotation = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X)*0.4;
+  bool punch_one_new = FlySky.readChannel(FLYSKY_BUTTON_SWA)>0;
+  bool punch_one = punch_one_new!=global_punch_one_old;
+  global_punch_one_old = punch_one_new;
+  bool punch_many = FlySky.readChannel(FLYSKY_BUTTON_SWD)>0;
   // Serial.println(String(y)+" "+String(x)+" "+String(punch));
-  motors.run(y-x,y+x);
-  if (punch) solenoidPunch();
+  motors.run(y+x+rotation,y-x-rotation,y-x+rotation,y+x-rotation);
+  if (punch_one || punch_many) solenoidPunch();
 }
 
 void solenoidPunch() {
   digitalWrite(SOLENOID_PIN,1);
   delay(100);
   digitalWrite(SOLENOID_PIN,0);
+}
+
+void testMotors() {
+  motors.run(100,0,0,0); delay(2000);
+  motors.run(0,100,0,0); delay(2000);
+  motors.run(0,0,100,0); delay(2000);
+  motors.run(0,0,0,100); delay(2000);
+  motors.run(-100,0,0,0); delay(2000);
+  motors.run(0,-100,0,0); delay(2000);
+  motors.run(0,0,-100,0); delay(2000);
+  motors.run(0,0,0,-100); delay(2000);
+  motors.run();
 }

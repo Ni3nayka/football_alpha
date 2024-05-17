@@ -12,14 +12,6 @@
 
 #pragma once
 
-// CH1-CH6
-#define FLYSKY_JOYSTICK_LEFT_X A3
-#define FLYSKY_JOYSTICK_LEFT_Y A2
-#define FLYSKY_JOYSTICK_RIGHT_X A0
-#define FLYSKY_JOYSTICK_RIGHT_Y A1
-#define FLYSKY_BUTTON_SWA A4
-#define FLYSKY_BUTTON_SWD A5
-
 class MyFlySky {
   public:
     void setup() {
