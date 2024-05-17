@@ -25,13 +25,17 @@ void setup() {
 
 void loop() {
   // FlySky.test();
+  // moves
   int x = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
   int y = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
-  int rotation = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X)*0.4;
+  int rotation = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
+  if (x==0 && y==0) rotation*=0.4;
+  else rotation*=0.2;
+  // punch
   bool punch_one_new = FlySky.readChannel(FLYSKY_BUTTON_SWA)>0;
+  bool punch_many = FlySky.readChannel(FLYSKY_BUTTON_SWD)>0;
   bool punch_one = punch_one_new!=global_punch_one_old;
   global_punch_one_old = punch_one_new;
-  bool punch_many = FlySky.readChannel(FLYSKY_BUTTON_SWD)>0;
   // Serial.println(String(y)+" "+String(x)+" "+String(punch));
   motors.run(y+x+rotation,y-x-rotation,y-x+rotation,y+x-rotation);
   if (punch_one || punch_many) solenoidPunch();
