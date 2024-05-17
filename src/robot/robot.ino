@@ -14,7 +14,7 @@
 
 void setup() {
   // Serial.begin(9600);
-  FlySky.begin(Serial);
+  FlySky.setup();
   motors.setup();
   pinMode(SOLENOID_PIN,OUTPUT);
   digitalWrite(SOLENOID_PIN,0);
@@ -22,10 +22,10 @@ void setup() {
 }
 
 void loop() {
-  // for (int i = 0; i<14; i++) Serial.print(String(FlySky.readChannel(i)) + " "); Serial.println();
-  int x = FlySky.readChannel(3);
-  int y = FlySky.readChannel(1);
-  bool punch = FlySky.readChannel(6)>0 || FlySky.readChannel(7)>0;
+  // FlySky.test();
+  int x = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
+  int y = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
+  bool punch = FlySky.readChannel(FLYSKY_BUTTON_SWA)>0 || FlySky.readChannel(FLYSKY_BUTTON_SWD)>0;
   // Serial.println(String(y)+" "+String(x)+" "+String(punch));
   motors.run(x+y,x-y);
   if (punch) solenoidPunch();
