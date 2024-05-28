@@ -68,6 +68,12 @@ void loop1() {
   speed *= boost;
   // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation) + "   boost " + String(boost));
   motors.run_vector(speed,angle,rotation);
+  // punch
+  bool punch_one_new = FlySky.readChannel(FLYSKY_BUTTON_SWA)>0;
+  bool punch_many = FlySky.readChannel(FLYSKY_BUTTON_SWD)>0;
+  bool punch_one = punch_one_new!=global_punch_one_old;
+  global_punch_one_old = punch_one_new;
+  if (punch_one || punch_many) solenoidPunch();
 }
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
