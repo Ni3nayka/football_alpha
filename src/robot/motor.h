@@ -10,6 +10,8 @@ class Motor {
       pinMode(Motor::pin_dir,OUTPUT);
       pinMode(Motor::pin_pwm,OUTPUT);
       Motor::run();
+      if (Motor::k>1.0) Motor::k = 1.0;
+      else if (Motor::k<0) Motor::k = 0;
       Motor::k = k;
     }
     void run(int speed=0) {
