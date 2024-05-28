@@ -13,6 +13,8 @@
 
 bool global_punch_one_old = 0;
 
+#define NO_BOOST_PART 0.6
+
 void setup() {
   // Serial.begin(9600);
   FlySky.setup();
@@ -24,10 +26,13 @@ void setup() {
 }
 
 void loop() {
+  /*
   // FlySky.test();
   // moves
-  int x = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
-  int y = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
+  // int boost = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_Y)*(1-NO_BOOST_PART);
+  int x = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_X)*NO_BOOST_PART;
+  // if (x>0) x+=boost
+  int y = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y)*NO_BOOST_PART;
   int rotation = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
   if (x==0 && y==0) rotation*=0.4;
   else rotation*=0.2;
@@ -38,8 +43,37 @@ void loop() {
   global_punch_one_old = punch_one_new;
   // Serial.println(String(y)+" "+String(x)+" "+String(punch));
   motors.run(y+x+rotation,y-x-rotation,y-x+rotation,y+x-rotation);
-  if (punch_one || punch_many) solenoidPunch();
+  if (punch_one || punch_many) solenoidPunch();*/
+  loop1();
 }
+
+void loop1() {
+  // read pult
+  float boost = fmap(FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_Y)+100,0,200,NO_BOOST_PART,1);
+  int x = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
+  int y = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
+  int rotation = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
+  // translate pult
+  int angle = 0, speed = 0;
+  if (x!=0 || y!=0) {
+    angle = atan(float(x)/float(y))*57.3;
+    if (y<0) {
+      if (x>0) angle+=180;
+      else angle-=180;
+    }
+  }
+  speed = max(abs(x),abs(y));
+  if (speed==0) rotation*=0.4;
+  else rotation*=0.2;
+  speed *= boost;
+  // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation) + "   boost " + String(boost));
+  motors.run_vector(speed,angle,rotation);
+}
+
+float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 
 void solenoidPunch() {
   digitalWrite(SOLENOID_PIN,1);

@@ -4,21 +4,23 @@
 
 class Motor {
   public:
-    void setup(int pin_dir, int pin_pwm) {
+    void setup(int pin_dir, int pin_pwm, float k=1.0) {
       Motor::pin_dir = pin_dir;
       Motor::pin_pwm = pin_pwm;
       pinMode(Motor::pin_dir,OUTPUT);
       pinMode(Motor::pin_pwm,OUTPUT);
       Motor::run();
+      Motor::k = k;
     }
     void run(int speed=0) {
       if (abs(speed)<5) speed = 0;
-      else speed = constrain(speed,-100,100)*MOTOR_MAP;
+      else speed = constrain(speed,-100,100)*MOTOR_MAP*k;
       digitalWrite(Motor::pin_dir,speed>0);
       analogWrite(Motor::pin_pwm,abs(speed));
     }
   private:
     int pin_dir, pin_pwm;
+    float k;
 };
 
 
@@ -40,11 +42,11 @@ class Motors {
     Motor motor_2;
     Motor motor_3;
     Motor motor_4;
-    void setup() {
-      motor_1.setup(MOTOR_1_DIR,MOTOR_1_PWM);
-      motor_2.setup(MOTOR_2_DIR,MOTOR_2_PWM);
-      motor_3.setup(MOTOR_3_DIR,MOTOR_3_PWM);
-      motor_4.setup(MOTOR_4_DIR,MOTOR_4_PWM);
+    void setup(float a=1.0,float b=1.0,float c=1.0,float d=1.0) {
+      motor_1.setup(MOTOR_1_DIR,MOTOR_1_PWM,a);
+      motor_2.setup(MOTOR_2_DIR,MOTOR_2_PWM,b);
+      motor_3.setup(MOTOR_3_DIR,MOTOR_3_PWM,c);
+      motor_4.setup(MOTOR_4_DIR,MOTOR_4_PWM,d);
     }
     void run(int a=0,int b=0,int c=0,int d=0) {
       motor_1.run(a);
@@ -52,7 +54,28 @@ class Motors {
       motor_3.run(c);
       motor_4.run(d);
     }
+    void run_vector(int speed=0, int angle=0, int rotation=0) {
+      // подготовка
+      while (angle<0) angle+=360;
+      while (angle>360) angle-=360;
+      speed = constrain(speed,-100,100);
+      int motor_1_4=0,motor_2_3=0;
+      // вперед-назад
+      motor_1_4 = angle_to_speed(angle)*speed;
+      motor_2_3 = angle_to_speed(angle+90)*speed;
+      // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation));
+      motor_1.run(motor_1_4+rotation);
+      motor_2.run(motor_2_3-rotation);
+      motor_3.run(motor_2_3+rotation);
+      motor_4.run(motor_1_4-rotation);
+    }
   private:
+    float angle_to_speed(int angle) {
+      float speed_from_angle = fabs(fabs(angle/45.0-9)-4)-2;
+      if (speed_from_angle>1) speed_from_angle = 1;
+      else if (speed_from_angle<-1) speed_from_angle = -1;
+      return speed_from_angle;
+    }
 };
 
 Motors motors;
