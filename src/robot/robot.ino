@@ -17,7 +17,7 @@ bool global_punch_one_old = 0;
 
 void setup() {
   // Serial.begin(9600);
-  FlySky.setup();
+  flysky.setup();
   motors.setup();
   pinMode(SOLENOID_PIN,OUTPUT);
   digitalWrite(SOLENOID_PIN,0);
@@ -49,10 +49,10 @@ void loop() {
 
 void loop1() {
   // read pult
-  float boost = fmap(FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_Y)+100,0,200,NO_BOOST_PART,1);
-  int x = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
-  int y = FlySky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
-  int rotation = FlySky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
+  float boost = fmap(flysky.readChannel(FLYSKY_JOYSTICK_LEFT_Y)+100,0,200,NO_BOOST_PART,1);
+  int x = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
+  int y = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
+  int rotation = flysky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
   // translate pult
   int angle = 0, speed = 0;
   if (x!=0 || y!=0) {
@@ -69,8 +69,8 @@ void loop1() {
   // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation) + "   boost " + String(boost));
   motors.run_vector(speed,angle,rotation);
   // punch
-  bool punch_one_new = FlySky.readChannel(FLYSKY_BUTTON_SWA)>0;
-  bool punch_many = FlySky.readChannel(FLYSKY_BUTTON_SWD)>0;
+  bool punch_one_new = flysky.readChannel(FLYSKY_BUTTON_SWA)>0;
+  bool punch_many = flysky.readChannel(FLYSKY_BUTTON_SWD)>0;
   bool punch_one = punch_one_new!=global_punch_one_old;
   global_punch_one_old = punch_one_new;
   if (punch_one || punch_many) solenoidPunch();

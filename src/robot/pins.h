@@ -1,8 +1,4 @@
 #pragma once
-#pragma once
-
-// 1 - speed
-// 2 - dir
 
 #define MOTOR_1_PWM 5
 #define MOTOR_1_DIR 4

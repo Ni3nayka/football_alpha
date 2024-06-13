@@ -47,7 +47,7 @@ class MyFlySky {
   private:
 };
 
-MyFlySky FlySky;
+MyFlySky flysky;
 
 
     
