@@ -56,15 +56,15 @@ class Motors {
       motor_3.run(c);
       motor_4.run(d);
     }
-    void run_vector(int speed=0, int angle=0, int rotation=0) {
+    void runVector(int speed=0, int angle=0, int rotation=0) {
       // подготовка
       while (angle<0) angle+=360;
       while (angle>360) angle-=360;
       speed = constrain(speed,-100,100);
       int motor_1_4=0,motor_2_3=0;
       // вперед-назад
-      motor_1_4 = angle_to_speed(angle)*speed;
-      motor_2_3 = angle_to_speed(angle+90)*speed;
+      motor_1_4 = angleToSpeed(angle)*speed;
+      motor_2_3 = angleToSpeed(angle+90)*speed;
       // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation));
       motor_1.run(motor_1_4+rotation);
       motor_2.run(motor_2_3-rotation);
@@ -72,7 +72,7 @@ class Motors {
       motor_4.run(motor_1_4-rotation);
     }
   private:
-    float angle_to_speed(int angle) {
+    float angleToSpeed(int angle) {
       float speed_from_angle = fabs(fabs(angle/45.0-9)-4)-2;
       if (speed_from_angle>1) speed_from_angle = 1;
       else if (speed_from_angle<-1) speed_from_angle = -1;

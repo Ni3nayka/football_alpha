@@ -67,7 +67,7 @@ void loop1() {
   else rotation*=0.2;
   speed *= boost;
   // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation) + "   boost " + String(boost));
-  motors.run_vector(speed,angle,rotation);
+  motors.runVector(speed,angle,rotation);
   // punch
   bool punch_one_new = flysky.readChannel(FLYSKY_BUTTON_SWA)>0;
   bool punch_many = flysky.readChannel(FLYSKY_BUTTON_SWD)>0;
