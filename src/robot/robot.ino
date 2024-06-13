@@ -44,10 +44,10 @@ void loop() {
   // Serial.println(String(y)+" "+String(x)+" "+String(punch));
   motors.run(y+x+rotation,y-x-rotation,y-x+rotation,y+x-rotation);
   if (punch_one || punch_many) solenoidPunch();*/
-  loop1();
+  mainFlysky();
 }
 
-void loop1() {
+void mainFlysky() {
   // read pult
   float boost = fmap(flysky.readChannel(FLYSKY_JOYSTICK_LEFT_Y)+100,0,200,NO_BOOST_PART,1);
   int x = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
