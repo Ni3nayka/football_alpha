@@ -9,75 +9,56 @@
 
 #include "pins.h"
 #include "motor.h"
-#include "FlySky.h"
+// #include "FlySky.h"
+#include "FlySky_uart.h"
 
-bool global_punch_one_old = 0;
+Motor motor_1;
+Motor motor_2;
 
-#define NO_BOOST_PART 0.6
+#include "gy-25.h"
+GY25 gy25(9,2); // (TX,RX) - пины гироскопа
+// GY25_1 gy25;
 
 void setup() {
   // Serial.begin(9600);
-  flysky.setup();
-  motors.setup();
-  pinMode(SOLENOID_PIN,OUTPUT);
-  digitalWrite(SOLENOID_PIN,0);
-  // testMotors();
-  motors.run();
+  flysky.begin(Serial);
+  // flysky.setup();
+  motor_1.setup(MOTOR_1_DIR,MOTOR_1_PWM);
+  motor_2.setup(MOTOR_2_DIR,MOTOR_2_PWM,-1.0);
+  motor_1.run();
+  motor_2.run();
+  gy25.setup();
 }
+
+unsigned long int t = 0;
+long int rotation = 0;
 
 void loop() {
   mainFlysky();
+  // gy25.update();
+  // if (t<millis()) {
+  //   gy25.print();
+  //   t = millis() + 100;
+  // }
+  
 }
 
 void mainFlysky() {
-  // FlySky.test();
-  // read pult
-  float boost = fmap(flysky.readChannel(FLYSKY_JOYSTICK_LEFT_Y)+100,0,200,NO_BOOST_PART,1);
-  int x = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
-  int y = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
-  int rotation = flysky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
-  // translate pult
-  int angle = 0, speed = 0;
-  if (x!=0 || y!=0) {
-    angle = atan(float(x)/float(y))*57.3;
-    if (y<0) {
-      if (x>0) angle+=180;
-      else angle-=180;
-    }
+  int x=0,y=0;
+  x = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
+  y = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
+  int rotation_new = flysky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
+  if (abs(rotation_new)>50) {
+    if (t<millis()) {
+      rotation -= rotation_new/abs(rotation_new); 
+      t = millis()+10;
+    } 
   }
-  speed = max(abs(x),abs(y));
-  if (speed==0) rotation*=0.4;
-  else rotation*=0.2;
-  speed *= boost;
-  // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation) + "   boost " + String(boost));
-  motors.runVector(speed,angle,rotation);
-  // punch
-  bool punch_one_new = flysky.readChannel(FLYSKY_BUTTON_SWA)>0;
-  bool punch_many = flysky.readChannel(FLYSKY_BUTTON_SWD)>0;
-  bool punch_one = punch_one_new!=global_punch_one_old;
-  global_punch_one_old = punch_one_new;
-  if (punch_one || punch_many) solenoidPunch();
-}
 
-float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
+  gy25.update();
+  long int e = rotation - gy25.horizontal_angle;
+  if (abs(e)>5) x -= e*3.5;
 
-
-void solenoidPunch() {
-  digitalWrite(SOLENOID_PIN,1);
-  delay(100);
-  digitalWrite(SOLENOID_PIN,0);
-}
-
-void testMotors() {
-  motors.run(100,0,0,0); delay(2000);
-  motors.run(0,100,0,0); delay(2000);
-  motors.run(0,0,100,0); delay(2000);
-  motors.run(0,0,0,100); delay(2000);
-  motors.run(-100,0,0,0); delay(2000);
-  motors.run(0,-100,0,0); delay(2000);
-  motors.run(0,0,-100,0); delay(2000);
-  motors.run(0,0,0,-100); delay(2000);
-  motors.run();
+  motor_1.run(y-x);
+  motor_2.run(y+x);
 }
