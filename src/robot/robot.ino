@@ -19,12 +19,18 @@ BTS7960_PRO motors;
 GY25 gy25(12,8); // (TX,RX) - пины гироскопа
 // GY25_1 gy25;
 
+#define SOLENOID_PIN 13
+bool global_punch_one_old = 0;
+#define NO_BOOST_PART 0.6
+
 void setup() {
   // Serial.begin(9600);
   flysky.begin(Serial);
   // flysky.setup();
   motors.setup();
   gy25.setup();
+  pinMode(SOLENOID_PIN,OUTPUT);
+  // testMotors();
 }
 
 unsigned long int t = 0;
@@ -32,6 +38,7 @@ long int rotation = 0;
 
 void loop() {
   mainFlysky();
+  // mainFlyskyBeta();
   // gy25.update();
   // if (t<millis()) {
   //   gy25.print();
@@ -40,7 +47,7 @@ void loop() {
   
 }
 
-void mainFlysky() {
+void mainFlyskyBeta() {
   int x=0,y=0;
   x = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
   y = -flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
@@ -58,4 +65,98 @@ void mainFlysky() {
 
   motors.run(1,y-x);
   motors.run(2,y+x);
+}
+
+float angleToSpeed(int angle) {
+  float speed_from_angle = fabs(fabs(angle/45.0-9)-4)-2;
+  if (speed_from_angle>1) speed_from_angle = 1;
+  else if (speed_from_angle<-1) speed_from_angle = -1;
+  return speed_from_angle;
+}
+
+void runVector(int speed=0, int angle=0, int rotation=0) {
+  // подготовка
+  while (angle<0) angle+=360;
+  while (angle>360) angle-=360;
+  speed = constrain(speed,-100,100);
+  int motor_1_4=0,motor_2_3=0;
+  // вперед-назад
+  motor_1_4 = angleToSpeed(angle)*speed;
+  motor_2_3 = angleToSpeed(angle+90)*speed;
+  // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation));
+  motors.run(1,motor_1_4+rotation);
+  motors.run(2,motor_2_3-rotation);
+  motors.run(3,motor_2_3+rotation);
+  motors.run(4,motor_1_4-rotation);
+}
+
+long int napravlenie = 0;
+bool napravlenie_flag = 0;
+
+void mainFlysky() {
+  // FlySky.test();
+  // read pult
+  float boost = fmap(flysky.readChannel(FLYSKY_JOYSTICK_LEFT_Y)+100,0,200,NO_BOOST_PART,1);
+  int x = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
+  int y = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
+  int rotation = flysky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
+  // translate pult
+  int angle = 0, speed = 0;
+  if (x!=0 || y!=0) {
+    angle = atan(float(x)/float(y))*57.3;
+    if (y<0) {
+      if (x>0) angle+=180;
+      else angle-=180;
+    }
+  }
+  speed = max(abs(x),abs(y));
+  if (speed==0) rotation*=0.4;
+  else rotation*=0.2;
+  speed *= boost;
+
+  gy25.update();
+  if (rotation==0) {
+    if (napravlenie_flag) {
+      napravlenie_flag = 0;
+      napravlenie = gy25.horizontal_angle;
+    }
+    long int e = napravlenie - gy25.horizontal_angle;
+    if (abs(e)>5) rotation -= e*1.5;
+  } 
+  else napravlenie_flag = 1;
+  
+
+  // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation) + "   boost " + String(boost));
+  runVector(speed,angle,rotation);
+  // punch
+  bool punch_one_new = flysky.readChannel(FLYSKY_BUTTON_SWA)>0;
+  bool punch_many = flysky.readChannel(FLYSKY_BUTTON_SWD)>0;
+  bool punch_one = punch_one_new!=global_punch_one_old;
+  global_punch_one_old = punch_one_new;
+  if (punch_one || punch_many) solenoidPunch();
+}
+
+float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+
+
+
+void solenoidPunch() {
+  digitalWrite(SOLENOID_PIN,1);
+  delay(100);
+  digitalWrite(SOLENOID_PIN,0);
+}
+
+void testMotors() {
+  motors.runs(100,0,0,0); delay(2000);
+  motors.runs(0,100,0,0); delay(2000);
+  motors.runs(0,0,100,0); delay(2000);
+  motors.runs(0,0,0,100); delay(2000);
+  motors.runs(-100,0,0,0); delay(2000);
+  motors.runs(0,-100,0,0); delay(2000);
+  motors.runs(0,0,-100,0); delay(2000);
+  motors.runs(0,0,0,-100); delay(2000);
+  motors.runs();
 }
