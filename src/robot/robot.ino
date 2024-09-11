@@ -19,8 +19,13 @@ BTS7960_PRO motors;
 GY25 gy25(12,8); // (TX,RX) - пины гироскопа
 // GY25_1 gy25;
 
-#define SOLENOID_PIN 13
-bool global_punch_one_old = 0;
+#define SOLENOID_PIN 10
+#define SOLENOID_ANALOG_ENABLE_LOW  225 // пас
+#define SOLENOID_ANALOG_ENABLE_HIGH 255 // удар
+bool global_punch_low_old = 0;
+bool global_punch_high_old = 0;
+
+#define BOOST_ENABLE  // заккоментировать строку, если хотите отключить функцию ускорения по джойстику
 #define NO_BOOST_PART 0.6
 
 void setup() {
@@ -96,7 +101,9 @@ bool napravlenie_flag = 0;
 void mainFlysky() {
   // FlySky.test();
   // read pult
+  #ifdef BOOST_ENABLE
   float boost = fmap(flysky.readChannel(FLYSKY_JOYSTICK_LEFT_Y)+100,0,200,NO_BOOST_PART,1);
+  #endif
   int x = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
   int y = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
   int rotation = flysky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
@@ -112,7 +119,9 @@ void mainFlysky() {
   speed = max(abs(x),abs(y));
   if (speed==0) rotation*=0.4;
   else rotation*=0.2;
+  #ifdef BOOST_ENABLE
   speed *= boost;
+  #endif
 
   gy25.update();
   if (rotation==0) {
@@ -129,22 +138,26 @@ void mainFlysky() {
   // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation) + "   boost " + String(boost));
   runVector(speed,angle,rotation);
   // punch
-  bool punch_one_new = flysky.readChannel(FLYSKY_BUTTON_SWA)>0;
-  bool punch_many = flysky.readChannel(FLYSKY_BUTTON_SWD)>0;
-  bool punch_one = punch_one_new!=global_punch_one_old;
-  global_punch_one_old = punch_one_new;
-  if (punch_one || punch_many) solenoidPunch();
+  bool punch_low = flysky.readChannel(FLYSKY_BUTTON_SWA)>0;
+  bool punch_high = flysky.readChannel(FLYSKY_BUTTON_SWD)>0;
+  if (punch_low!=global_punch_low_old) solenoidPunchLow();
+  global_punch_low_old = punch_low;
+  if (punch_high!=global_punch_high_old) solenoidPunchHigh();
+  global_punch_high_old = punch_high;
 }
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
+void solenoidPunchLow() {
+  analogWrite(SOLENOID_PIN,SOLENOID_ANALOG_ENABLE_LOW);
+  delay(100);
+  digitalWrite(SOLENOID_PIN,0);
+}
 
-
-
-void solenoidPunch() {
-  digitalWrite(SOLENOID_PIN,1);
+void solenoidPunchHigh() {
+  analogWrite(SOLENOID_PIN,SOLENOID_ANALOG_ENABLE_HIGH);
   delay(100);
   digitalWrite(SOLENOID_PIN,0);
 }
