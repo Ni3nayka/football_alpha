@@ -25,6 +25,9 @@ GY25 gy25(12,8); // (TX,RX) - пины гироскопа
 bool global_punch_low_old = 0;
 bool global_punch_high_old = 0;
 
+#define PUNCH_BUTTON_ON_FLYSKY_HIGH FLYSKY_BUTTON_SWA
+#define PUNCH_BUTTON_ON_FLYSKY_LOW  FLYSKY_BUTTON_SWD
+
 #define BOOST_ENABLE  // заккоментировать строку, если хотите отключить функцию ускорения по джойстику
 #define NO_BOOST_PART 0.6
 
@@ -138,8 +141,8 @@ void mainFlysky() {
   // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation) + "   boost " + String(boost));
   runVector(speed,angle,rotation);
   // punch
-  bool punch_low = flysky.readChannel(FLYSKY_BUTTON_SWA)>0;
-  bool punch_high = flysky.readChannel(FLYSKY_BUTTON_SWD)>0;
+  bool punch_low = flysky.readChannel(PUNCH_BUTTON_ON_FLYSKY_LOW)>0;
+  bool punch_high = flysky.readChannel(PUNCH_BUTTON_ON_FLYSKY_HIGH)>0;
   if (punch_low!=global_punch_low_old) solenoidPunchLow();
   global_punch_low_old = punch_low;
   if (punch_high!=global_punch_high_old) solenoidPunchHigh();
