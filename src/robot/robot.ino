@@ -120,6 +120,7 @@ void mainFlysky() {
     }
   }
   speed = max(abs(x),abs(y));
+  if (abs(speed)<5) speed = 0; // поправка на погрешность пульта в нуле
   if (speed==0) rotation*=0.4;
   else rotation*=0.2;
   #ifdef BOOST_ENABLE
