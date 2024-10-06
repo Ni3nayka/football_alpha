@@ -150,7 +150,7 @@ void mainFlysky() {
   bool punch_low = flysky.readChannel(PUNCH_BUTTON_ON_FLYSKY_LOW)>0;
   bool punch_high = flysky.readChannel(PUNCH_BUTTON_ON_FLYSKY_HIGH)>0;
   if (punch_low!=global_punch_low_old) { 
-    if (global_drimblrer_timer+500>millis()) solenoidPunchLow();
+    if (global_drimblrer_timer+500<millis()) solenoidPunchLow();
     else { // двойной клик, включаем\выключаем дримблер
       global_drinbler_state = !global_drinbler_state;
       digitalWrite(CHANNEL_DRIMBLER_PIN,global_drinbler_state);
