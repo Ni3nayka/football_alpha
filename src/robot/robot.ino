@@ -31,6 +31,10 @@ bool global_punch_high_old = 0;
 #define BOOST_ENABLE  // заккоментировать строку, если хотите отключить функцию ускорения по джойстику
 #define NO_BOOST_PART 0.6
 
+#define CHANNEL_DRIMBLER_PIN 13
+unsigned long int global_drimblrer_timer = 0;
+bool global_drinbler_state = 0;
+
 void setup() {
   // Serial.begin(9600);
   flysky.begin(Serial);
@@ -38,6 +42,7 @@ void setup() {
   motors.setup();
   gy25.setup();
   pinMode(SOLENOID_PIN,OUTPUT);
+  pinMode(CHANNEL_DRIMBLER_PIN,OUTPUT);
   // testMotors();
 }
 
@@ -144,7 +149,15 @@ void mainFlysky() {
   // punch
   bool punch_low = flysky.readChannel(PUNCH_BUTTON_ON_FLYSKY_LOW)>0;
   bool punch_high = flysky.readChannel(PUNCH_BUTTON_ON_FLYSKY_HIGH)>0;
-  if (punch_low!=global_punch_low_old) solenoidPunchLow();
+  if (punch_low!=global_punch_low_old) { 
+    if (global_drimblrer_timer+500>millis()) solenoidPunchLow();
+    else { // двойной клик, включаем\выключаем дримблер
+      global_drinbler_state = !global_drinbler_state;
+      digitalWrite(CHANNEL_DRIMBLER_PIN,global_drinbler_state);
+    }
+    global_drimblrer_timer = millis();
+
+  }
   global_punch_low_old = punch_low;
   if (punch_high!=global_punch_high_old) solenoidPunchHigh();
   global_punch_high_old = punch_high;
