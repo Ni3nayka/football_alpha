@@ -15,8 +15,8 @@
 #include "BTS7960_PRO.h"
 BTS7960_PRO motors;
 
-#include "gy-25.h"
-GY25 gy25(12,8); // (TX,RX) - пины гироскопа
+// #include "gy-25.h"
+// GY25 gy25(12,8); // (TX,RX) - пины гироскопа
 // GY25_1 gy25;
 
 #define SOLENOID_PIN 10
@@ -35,15 +35,28 @@ bool global_punch_high_old = 0;
 unsigned long int global_drimblrer_timer = 0;
 bool global_drinbler_state = 0;
 
+// #include <Servo.h>
+// Servo ESC;     // create servo object to control the ESC
+
 void setup() {
   // Serial.begin(9600);
   flysky.begin(Serial);
   // flysky.setup();
   motors.setup();
-  gy25.setup();
+  // gy25.setup();
   pinMode(SOLENOID_PIN,OUTPUT);
   pinMode(CHANNEL_DRIMBLER_PIN,OUTPUT);
   // testMotors();
+
+  for (long int t = millis()+2000; t>millis();) drimblerRun(2300);
+  for (long int t = millis()+4000; t>millis();) drimblerRun(800);
+  // ESC.attach(CHANNEL_DRIMBLER_PIN);
+  // 800-2300
+  // initialize
+  // ESC.writeMicroseconds(2300); 
+  // delay(2000);
+  // ESC.writeMicroseconds(800); 
+  // delay(4000); // 2000
 }
 
 unsigned long int t = 0;
@@ -72,9 +85,9 @@ void mainFlyskyBeta() {
     } 
   }
 
-  gy25.update();
-  long int e = rotation - gy25.horizontal_angle;
-  if (abs(e)>5) x -= e*3;
+  // gy25.update();
+  // long int e = rotation - gy25.horizontal_angle;
+  // if (abs(e)>5) x -= e*3;
 
   motors.run(1,y-x);
   motors.run(2,y+x);
@@ -132,16 +145,16 @@ void mainFlysky() {
   speed *= boost;
   #endif
 
-  gy25.update();
-  if (rotation==0) {
-    if (napravlenie_flag) {
-      napravlenie_flag = 0;
-      napravlenie = gy25.horizontal_angle;
-    }
-    long int e = napravlenie - gy25.horizontal_angle;
-    if (abs(e)>5) rotation -= e*1.5;
-  } 
-  else napravlenie_flag = 1;
+  // gy25.update();
+  // if (rotation==0) {
+  //   if (napravlenie_flag) {
+  //     napravlenie_flag = 0;
+  //     napravlenie = gy25.horizontal_angle;
+  //   }
+  //   long int e = napravlenie - gy25.horizontal_angle;
+  //   if (abs(e)>5) rotation -= e*1.5;
+  // } 
+  // else napravlenie_flag = 1;
   
 
   // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation) + "   boost " + String(boost));
@@ -153,7 +166,13 @@ void mainFlysky() {
     if (global_drimblrer_timer+500<millis()) solenoidPunchLow();
     else { // двойной клик, включаем\выключаем дримблер
       global_drinbler_state = !global_drinbler_state;
-      digitalWrite(CHANNEL_DRIMBLER_PIN,global_drinbler_state);
+      // if (global_drinbler_state) {
+      //   ESC.writeMicroseconds(1500); // middle
+      // }
+      // else {
+      //   ESC.writeMicroseconds(800); // off
+      // }
+      // digitalWrite(CHANNEL_DRIMBLER_PIN,global_drinbler_state);
     }
     global_drimblrer_timer = millis();
 
@@ -161,6 +180,16 @@ void mainFlysky() {
   global_punch_low_old = punch_low;
   if (punch_high!=global_punch_high_old) solenoidPunchHigh();
   global_punch_high_old = punch_high;
+  // drimbler
+  drimblerRun(global_drinbler_state?1900:800);
+}
+
+void drimblerRun(int pos) {
+  // int pos = global_drinbler_state?1500:800;
+  digitalWrite(CHANNEL_DRIMBLER_PIN, 1);
+  delayMicroseconds(pos);
+  digitalWrite(CHANNEL_DRIMBLER_PIN, 0);
+  delayMicroseconds(20000-pos);
 }
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
