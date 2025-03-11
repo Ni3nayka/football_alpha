@@ -1,12 +1,7 @@
 #pragma once
 
-#define MOTOR_1_PWM 11
-#define MOTOR_1_DIR 13
-#define MOTOR_2_PWM 10
-#define MOTOR_2_DIR 12
-
-// #define BLUETOOTH_RX A0
-// #define BLUETOOTH_TX A1
+#define SOLENOID_PIN 10
+#define CHANNEL_DRIMBLER_PIN 13
 
 // CH1-CH6
 // #define FLYSKY_JOYSTICK_LEFT_X A3

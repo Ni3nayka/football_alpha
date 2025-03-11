@@ -4,13 +4,12 @@
 
    author: Egor Bakay <egor_bakay@inbox.ru> Ni3nayka
    write:  May 2024
-   modify: May 2024
+   modify: March 2025
 */
 
 #include "pins.h"
-// #include "motor.h"
-// #include "FlySky.h"
 #include "FlySky_uart.h"
+#include "bumper.h"
 
 #include "BTS7960_PRO.h"
 BTS7960_PRO motors;
@@ -19,24 +18,11 @@ BTS7960_PRO motors;
 // GY25 gy25(12,8); // (TX,RX) - пины гироскопа
 // GY25_1 gy25;
 
-#define SOLENOID_PIN 10
-#define SOLENOID_ANALOG_ENABLE_LOW  225 // пас
-#define SOLENOID_ANALOG_ENABLE_HIGH 255 // удар
-bool global_punch_low_old = 0;
-bool global_punch_high_old = 0;
-
 #define PUNCH_BUTTON_ON_FLYSKY_HIGH FLYSKY_BUTTON_SWA
 #define PUNCH_BUTTON_ON_FLYSKY_LOW  FLYSKY_BUTTON_SWD
 
 #define BOOST_ENABLE  // заккоментировать строку, если хотите отключить функцию ускорения по джойстику
 #define NO_BOOST_PART 0.6
-
-#define CHANNEL_DRIMBLER_PIN 13
-unsigned long int global_drimblrer_timer = 0;
-bool global_drinbler_state = 0;
-
-// #include <Servo.h>
-// Servo ESC;     // create servo object to control the ESC
 
 void setup() {
   // Serial.begin(9600);
@@ -44,19 +30,8 @@ void setup() {
   // flysky.setup();
   motors.setup();
   // gy25.setup();
-  pinMode(SOLENOID_PIN,OUTPUT);
-  pinMode(CHANNEL_DRIMBLER_PIN,OUTPUT);
+  setupBumper();
   // testMotors();
-
-  for (long int t = millis()+2000; t>millis();) drimblerRun(2300);
-  for (long int t = millis()+4000; t>millis();) drimblerRun(800);
-  // ESC.attach(CHANNEL_DRIMBLER_PIN);
-  // 800-2300
-  // initialize
-  // ESC.writeMicroseconds(2300); 
-  // delay(2000);
-  // ESC.writeMicroseconds(800); 
-  // delay(4000); // 2000
 }
 
 unsigned long int t = 0;
@@ -71,26 +46,6 @@ void loop() {
   //   t = millis() + 100;
   // }
   
-}
-
-void mainFlyskyBeta() {
-  int x=0,y=0;
-  x = flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_X);
-  y = -flysky.readChannel(FLYSKY_JOYSTICK_RIGHT_Y);
-  int rotation_new = flysky.readChannel(FLYSKY_JOYSTICK_LEFT_X);
-  if (abs(rotation_new)>50) {
-    if (t<millis()) {
-      rotation -= rotation_new/abs(rotation_new); 
-      t = millis()+10;
-    } 
-  }
-
-  // gy25.update();
-  // long int e = rotation - gy25.horizontal_angle;
-  // if (abs(e)>5) x -= e*3;
-
-  motors.run(1,y-x);
-  motors.run(2,y+x);
 }
 
 float angleToSpeed(int angle) {
@@ -164,15 +119,8 @@ void mainFlysky() {
   bool punch_high = flysky.readChannel(PUNCH_BUTTON_ON_FLYSKY_HIGH)>0;
   if (punch_low!=global_punch_low_old) { 
     if (global_drimblrer_timer+500<millis()) solenoidPunchLow();
-    else { // двойной клик, включаем\выключаем дримблер
+    else { // двойной клик, включаем\выключаем дримблеp
       global_drinbler_state = !global_drinbler_state;
-      // if (global_drinbler_state) {
-      //   ESC.writeMicroseconds(1500); // middle
-      // }
-      // else {
-      //   ESC.writeMicroseconds(800); // off
-      // }
-      // digitalWrite(CHANNEL_DRIMBLER_PIN,global_drinbler_state);
     }
     global_drimblrer_timer = millis();
 
@@ -181,31 +129,11 @@ void mainFlysky() {
   if (punch_high!=global_punch_high_old) solenoidPunchHigh();
   global_punch_high_old = punch_high;
   // drimbler
-  drimblerRun(global_drinbler_state?1900:800);
-}
-
-void drimblerRun(int pos) {
-  // int pos = global_drinbler_state?1500:800;
-  digitalWrite(CHANNEL_DRIMBLER_PIN, 1);
-  delayMicroseconds(pos);
-  digitalWrite(CHANNEL_DRIMBLER_PIN, 0);
-  delayMicroseconds(20000-pos);
+  drimblerRun(global_drinbler_state?DRIMBLER_ON_VALUE:DRIMBLER_MIN_VALUE);
 }
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
-void solenoidPunchLow() {
-  analogWrite(SOLENOID_PIN,SOLENOID_ANALOG_ENABLE_LOW);
-  delay(100);
-  digitalWrite(SOLENOID_PIN,0);
-}
-
-void solenoidPunchHigh() {
-  analogWrite(SOLENOID_PIN,SOLENOID_ANALOG_ENABLE_HIGH);
-  delay(100);
-  digitalWrite(SOLENOID_PIN,0);
 }
 
 void testMotors() {
