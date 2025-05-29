@@ -11,6 +11,10 @@
 #include "FlySky_uart.h"
 #include "bumper.h"
 
+#define SPEED_K_MOTOR_1 1.0
+#define SPEED_K_MOTOR_2 1.0
+#define SPEED_K_MOTOR_3 1.0
+#define SPEED_K_MOTOR_4 1.0
 #include "BTS7960_PRO.h"
 BTS7960_PRO motors;
 
@@ -65,10 +69,11 @@ void runVector(int speed=0, int angle=0, int rotation=0) {
   motor_1_4 = angleToSpeed(angle)*speed;
   motor_2_3 = angleToSpeed(angle+90)*speed;
   // Serial.println("speed " + String(speed) + "   angle " + String(angle) +  + "   rotation " + String(rotation));
-  motors.run(1,motor_1_4+rotation);
-  motors.run(2,motor_2_3-rotation);
-  motors.run(3,motor_2_3+rotation);
-  motors.run(4,motor_1_4-rotation);
+  // motors.run(1,motor_1_4+rotation);
+  // motors.run(2,motor_2_3-rotation);
+  // motors.run(3,motor_2_3+rotation);
+  // motors.run(4,motor_1_4-rotation);
+  motors.runs(motor_1_4+rotation,motor_2_3-rotation,motor_2_3+rotation,motor_1_4-rotation);
 }
 
 long int napravlenie = 0;

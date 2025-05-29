@@ -48,10 +48,10 @@ class BTS7960_PRO {
       BTS7960_PRO::runBasic(number,speed,0,update);
     }
     void runs(int a=0, int b=0, int c=0, int d=0) {
-      BTS7960_PRO::run(1,a,0);
-      BTS7960_PRO::run(2,b,0);
-      BTS7960_PRO::run(3,c,0);
-      BTS7960_PRO::run(4,d);
+      BTS7960_PRO::run(1,a*SPEED_K_MOTOR_1,0);
+      BTS7960_PRO::run(2,b*SPEED_K_MOTOR_2,0);
+      BTS7960_PRO::run(3,c*SPEED_K_MOTOR_3,0);
+      BTS7960_PRO::run(4,d*SPEED_K_MOTOR_4);
     }
     void blockMotor(int number, bool update=1) {
       BTS7960_PRO::runBasic(number,0,1,update);
