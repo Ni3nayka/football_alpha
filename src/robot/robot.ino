@@ -15,6 +15,7 @@
 #define SPEED_K_MOTOR_2 1.0
 #define SPEED_K_MOTOR_3 1.0
 #define SPEED_K_MOTOR_4 1.0
+#define SPEED_K_ROTATION 1.0
 #include "BTS7960_PRO.h"
 BTS7960_PRO motors;
 
@@ -73,6 +74,7 @@ void runVector(int speed=0, int angle=0, int rotation=0) {
   // motors.run(2,motor_2_3-rotation);
   // motors.run(3,motor_2_3+rotation);
   // motors.run(4,motor_1_4-rotation);
+  rotation *= SPEED_K_ROTATION;
   motors.runs(motor_1_4+rotation,motor_2_3-rotation,motor_2_3+rotation,motor_1_4-rotation);
 }
 
