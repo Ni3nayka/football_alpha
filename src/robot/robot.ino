@@ -11,12 +11,22 @@
 #include "FlySky_uart.h"
 #include "bumper.h"
 
+// коэфициенты для моторов 
+// при движении вперед
 #define SPEED_K_MOTOR_1 1.0
 #define SPEED_K_MOTOR_2 1.0
 #define SPEED_K_MOTOR_3 1.0
 #define SPEED_K_MOTOR_4 1.0
-#define SPEED_K_ROTATION_LEFT  1.0
-#define SPEED_K_ROTATION_RIGHT 1.0
+// поворот налево
+#define SPEED_K_ROTATION_LEFT_1  1.0
+#define SPEED_K_ROTATION_LEFT_2  1.0
+#define SPEED_K_ROTATION_LEFT_3  1.0
+#define SPEED_K_ROTATION_LEFT_4  1.0
+// поворот направо
+#define SPEED_K_ROTATION_RIGHT_1 1.0
+#define SPEED_K_ROTATION_RIGHT_2 1.0
+#define SPEED_K_ROTATION_RIGHT_3 1.0
+#define SPEED_K_ROTATION_RIGHT_4 1.0
 #include "BTS7960_PRO.h"
 BTS7960_PRO motors;
 
@@ -26,6 +36,9 @@ BTS7960_PRO motors;
 
 #define PUNCH_BUTTON_ON_FLYSKY_HIGH FLYSKY_BUTTON_SWA
 #define PUNCH_BUTTON_ON_FLYSKY_LOW  FLYSKY_BUTTON_SWD
+
+#define DRIMBLER_BUTTON FLYSKY_BUTTON_SWB // FLYSKY_BUTTON_SWD
+#define DRIMBLER_BUTTON_DOUBLE_FLAG 0 // 1 if FLYSKY_BUTTON_SWD
 
 #define BOOST_ENABLE  // заккоментировать строку, если хотите отключить функцию ускорения по джойстику
 #define NO_BOOST_PART 0.6
@@ -75,9 +88,11 @@ void runVector(int speed=0, int angle=0, int rotation=0) {
   // motors.run(2,motor_2_3-rotation);
   // motors.run(3,motor_2_3+rotation);
   // motors.run(4,motor_1_4-rotation);
-  if (rotation<0) rotation *= SPEED_K_ROTATION_LEFT;
-  else rotation *= SPEED_K_ROTATION_RIGHT;
-  motors.runs(motor_1_4+rotation,motor_2_3-rotation,motor_2_3+rotation,motor_1_4-rotation);
+  // if (rotation<0) rotation *= SPEED_K_ROTATION_LEFT;
+  // else rotation *= SPEED_K_ROTATION_RIGHT;
+  if (rotation<0) motors.runs(motor_1_4+rotation*SPEED_K_ROTATION_LEFT_1,motor_2_3-rotation*SPEED_K_ROTATION_LEFT_2,motor_2_3+rotation*SPEED_K_ROTATION_LEFT_3,motor_1_4-rotation*SPEED_K_ROTATION_LEFT_4);
+  else motors.runs(motor_1_4+rotation*SPEED_K_ROTATION_RIGHT_1,motor_2_3-rotation*SPEED_K_ROTATION_RIGHT_2,motor_2_3+rotation*SPEED_K_ROTATION_RIGHT_3,motor_1_4-rotation*SPEED_K_ROTATION_RIGHT_4);
+  // motors.runs(motor_1_4+rotation,motor_2_3-rotation,motor_2_3+rotation,motor_1_4-rotation);
 }
 
 long int napravlenie = 0;
@@ -126,9 +141,12 @@ void mainFlysky() {
   // punch
   bool punch_low = flysky.readChannel(PUNCH_BUTTON_ON_FLYSKY_LOW)>0;
   bool punch_high = flysky.readChannel(PUNCH_BUTTON_ON_FLYSKY_HIGH)>0;
+  if (!DRIMBLER_BUTTON_DOUBLE_FLAG) { // если включен режим запуска дримблера по кнопке
+    global_drinbler_state = flysky.readChannel(DRIMBLER_BUTTON)>0; // записать в состояние дримблера состояние кнопки
+  }
   if (punch_low!=global_punch_low_old) { 
     if (global_drimblrer_timer+500<millis()) solenoidPunchLow();
-    else { // двойной клик, включаем\выключаем дримблеp
+    else if (DRIMBLER_BUTTON_DOUBLE_FLAG) { // двойной клик, включаем\выключаем дримблеp
       global_drinbler_state = !global_drinbler_state;
     }
     global_drimblrer_timer = millis();
